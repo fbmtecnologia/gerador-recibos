@@ -4,17 +4,21 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>Gerador de Recibos EUROMIRELLA</title>
+    <!-- Inclui Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Inclui a fonte Poppins e ícones Font Awesome -->
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
     <style>
-        body { font-family: 'Poppins', sans-serif; }
-        .loader{border:4px solid #f3f3f3;border-top:4px solid #6366f1;border-radius:50%;width:30px;height:30px;animation:spin 1s linear infinite;display:none}
+        /* A cor primária do tema foi alterada para um cinza escuro/preto para impressão */
+        body { font-family: 'Poppins', sans-serif; background-color: #f7f7f7; }
+        .loader{border:4px solid #f3f3f3;border-top:4px solid #333;border-radius:50%;width:30px;height:30px;animation:spin 1s linear infinite;display:none}
         @keyframes spin{0%{transform:rotate(0)}100%{transform:rotate(360deg)}}
         .fade-in { animation: fadeIn 0.5s ease-in-out; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
-        /* Nova abordagem Flexbox para alinhamento */
+        /* Estilos de input aprimorados */
         .input-container {
             display: flex;
             align-items: center;
@@ -23,10 +27,12 @@
             padding: 0.5rem 1rem;
             box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
             transition: all 0.2s;
+            background-color: #f9fafb;
         }
         .input-container:focus-within {
-            border-color: #6366f1;
-            box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.5);
+            border-color: #333; /* Foco em preto */
+            box-shadow: 0 0 0 2px rgba(51, 51, 51, 0.5);
+            background-color: #ffffff;
         }
         .input-container input, .input-container select, .input-container textarea {
             border: none;
@@ -35,43 +41,76 @@
             padding: 0;
             width: 100%;
             background: transparent;
+            color: #1f2937; /* Cor do texto padrão */
         }
         .input-container input::placeholder, .input-container textarea::placeholder {
             color: #9ca3af;
         }
         .input-icon {
-            color: #9ca3af;
+            color: #333; /* Ícones em preto */
             font-size: 1.25rem;
             margin-right: 0.75rem;
         }
 
+        /* Estilos de impressão (Foco Totalmente em Preto/Branco) */
         @media print {
             @page { size: A4 portrait; margin: 0 !important; }
-            html,body{width:100%;height:100%;margin:0 !important;padding:0 !important;overflow:hidden !important;background:#fff !important}
+            html,body{width:100%;height:100%;margin:0 !important;padding:0 !important;overflow:hidden !important;background:#fff !important; color: #000 !important;}
             body>*:not(#receiptContainer){display:none !important}
+            
+            /* Ajustes de cor para a impressão */
+            #receiptContainer { color: #000 !important; }
+            /* Borda do recibo sólida preta, padding vertical mínimo */
+            #receiptPreview { 
+                border-color: #000 !important; 
+                color: #000 !important; 
+                border-style: solid !important; 
+                border-width: 1px !important; 
+                padding: 10px 15px !important; /* Reduzindo padding vertical */
+            } 
+            
+            /* Removendo cores do tema e usando preto */
+            #receiptPreview .font-semibold, 
+            #receiptPreview .text-indigo-700, 
+            #receiptPreview .text-indigo-900 { 
+                color: #000 !important; 
+                font-weight: 600 !important;
+            }
+
+            #receiptPreview .text-gray-700 {
+                color: #000 !important;
+            }
+            
             #receiptContainer{display:block !important;visibility:visible !important;position:absolute !important;left:0;top:0;width:100% !important;max-width:100% !important;height:auto !important;min-height:auto !important;margin:0 !important;padding:8px !important;box-shadow:none !important;border:none !important;page-break-after:avoid !important;page-break-inside:avoid !important}
-            #receiptPreview{width:100% !important;margin:0 !important;box-shadow:none !important;border:none !important;padding:0 !important;min-height:auto !important;page-break-inside:avoid !important; border:none !important;}
-            #logoImageContainer img{max-width:180px !important;max-height:90px !important;object-fit:contain !important;display:block !important;margin:0 auto 15px auto !important}
-            #signatureImageContainer img{max-width:100px !important;max-height:50px !important;object-fit:contain !important;display:block !important;margin:5px auto 5px auto !important}
-            #receiptImageContainer img{max-width:100% !important;max-height:600px !important;object-fit:contain !important;margin-top:15px !important}
+            #receiptPreview{width:100% !important;margin:0 !important;box-shadow:none !important;border:none !important;padding:10px 15px !important;min-height:auto !important;page-break-inside:avoid !important; border:none !important;}
+            
+            #logoImageContainer img{max-width:180px !important;max-height:90px !important;object-fit:contain !important;display:block !important;margin:0 auto 10px auto !important} /* Reduzido margem */
+            #signatureImageContainer img{max-width:100px !important;max-height:50px !important;object-fit:contain !important;display:block !important;margin:3px auto 3px auto !important} /* Reduzido margem */
+            
+            /* Ajuste chave: reduzindo a altura máxima do comprovante para garantir uma única página */
+            #receiptImageContainer img{max-width:100% !important;max-height:500px !important; /* Reduzido de 600px para 500px */
+            object-fit:contain !important;margin-top:10px !important} 
+            
             #receiptPreview p{page-break-inside:avoid !important;orphans:2;widows:2}
             .no-print{display:none !important}
         }
     </style>
-    <script src="/app.js"></script>
 </head>
-<body class="bg-indigo-50 flex flex-col items-center justify-center p-6 min-h-screen">
+<body class="bg-gray-50 flex flex-col items-center justify-center p-6 min-h-screen">
+    
+    <!-- Formulário de Entrada -->
     <div id="inputFormContainer" class="bg-white p-10 rounded-2xl shadow-xl w-full max-w-2xl mb-8 no-print transform transition-transform duration-300 hover:scale-105">
-        <h1 class="text-4xl font-bold text-center text-indigo-900 mb-8 tracking-wide">Gerador de Recibos EUROMIRELLA ✨</h1>
+        <h1 class="text-4xl font-bold text-center text-gray-900 mb-8 tracking-wide">Gerador de Recibos EUROMIRELLA ✨</h1>
 
-        <div class="mb-6 border-b border-indigo-200 pb-4">
-            <h2 class="text-xl font-semibold text-indigo-800 mb-4">Informações do Recibo</h2>
+        <!-- Seção de Moeda -->
+        <div class="mb-6 border-b border-gray-200 pb-4">
+            <h2 class="text-xl font-semibold text-gray-800 mb-4">Configuração Financeira</h2>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                    <label for="currencySelect" class="block text-indigo-700 text-sm font-semibold mb-2">Moeda do Recibo:</label>
+                    <label for="currencySelect" class="block text-gray-700 text-sm font-semibold mb-2">Moeda do Recibo:</label>
                     <div class="input-container">
                         <i class="fa-solid fa-coins input-icon"></i>
-                        <select id="currencySelect" class="text-indigo-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition duration-200">
+                        <select id="currencySelect" class="text-gray-800 transition duration-200">
                             <option value="BRL" selected>BRL — Real (R$)</option>
                             <option value="EUR">EUR — Euro (€)</option>
                             <option value="USD">USD — Dólar (US$)</option>
@@ -82,35 +121,36 @@
                 </div>
                 <div id="custom-currency-inputs" class="md:col-span-2 hidden grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div class="input-container">
-                        <input id="customMajor" type="text" class="text-indigo-800 placeholder-indigo-400" placeholder="Nome da unidade (ex.: lira, rand)">
+                        <input id="customMajor" type="text" class="text-gray-800 placeholder-gray-400" placeholder="Nome da unidade (ex.: Lira, Rand)">
                     </div>
                     <div class="input-container">
-                        <input id="customMinor" type="text" class="text-indigo-800 placeholder-indigo-400" placeholder="Subunidade (ex.: kuruş, centavos)">
+                        <input id="customMinor" type="text" class="text-gray-800 placeholder-gray-400" placeholder="Subunidade (ex.: Kuruş, Centavos)">
                     </div>
                 </div>
             </div>
         </div>
 
-        <div class="mb-6 border-b border-indigo-200 pb-4">
-            <h2 class="text-xl font-semibold text-indigo-800 mb-4">Imagens (Opcional)</h2>
+        <!-- Seção de Imagens -->
+        <div class="mb-6 border-b border-gray-200 pb-4">
+            <h2 class="text-xl font-semibold text-gray-800 mb-4">Imagens (Opcional)</h2>
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div>
-                    <label for="logoImageInput" class="block text-indigo-700 text-sm font-semibold mb-2">Logo:</label>
-                    <input type="file" id="logoImageInput" accept="image/*" class="w-full text-sm text-indigo-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-purple-100 file:text-purple-700 hover:file:bg-purple-200 cursor-pointer transition duration-200"/>
+                    <label for="logoImageInput" class="block text-gray-700 text-sm font-semibold mb-2">Logo:</label>
+                    <input type="file" id="logoImageInput" accept="image/*" class="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-purple-100 file:text-purple-700 hover:file:bg-purple-200 cursor-pointer transition duration-200"/>
                     <div id="logoPreviewContainer" class="mt-4 flex justify-center">
                         <img id="logoImagePreview" src="#" alt="Prévia da Logo" class="hidden max-w-full h-auto rounded-lg shadow-sm border border-gray-200"/>
                     </div>
                 </div>
                 <div>
-                    <label for="signatureImageInput" class="block text-indigo-700 text-sm font-semibold mb-2">Assinatura:</label>
-                    <input type="file" id="signatureImageInput" accept="image/*" class="w-full text-sm text-indigo-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-green-100 file:text-green-700 hover:file:bg-green-200 cursor-pointer transition duration-200"/>
+                    <label for="signatureImageInput" class="block text-gray-700 text-sm font-semibold mb-2">Assinatura:</label>
+                    <input type="file" id="signatureImageInput" accept="image/*" class="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-green-100 file:text-green-700 hover:file:bg-green-200 cursor-pointer transition duration-200"/>
                     <div id="signaturePreviewContainer" class="mt-4 flex justify-center">
                         <img id="signatureImagePreview" src="#" alt="Prévia da Assinatura" class="hidden max-w-full h-auto rounded-lg shadow-sm border border-gray-200"/>
                     </div>
                 </div>
                 <div>
-                    <label for="proofImageInput" class="block text-indigo-700 text-sm font-semibold mb-2">Comprovante:</label>
-                    <input type="file" id="proofImageInput" accept="image/*" class="w-full text-sm text-indigo-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-100 file:text-blue-700 hover:file:bg-blue-200 cursor-pointer transition duration-200"/>
+                    <label for="proofImageInput" class="block text-gray-700 text-sm font-semibold mb-2">Comprovante:</label>
+                    <input type="file" id="proofImageInput" accept="image/*" class="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-100 file:text-blue-700 hover:file:bg-blue-200 cursor-pointer transition duration-200"/>
                     <div id="imagePreviewContainer" class="mt-4 flex justify-center">
                         <img id="proofImagePreview" src="#" alt="Prévia do Comprovante" class="hidden max-w-full h-auto rounded-lg shadow-sm border border-gray-200"/>
                     </div>
@@ -118,43 +158,47 @@
             </div>
         </div>
 
-        <div class="mb-6 border-b border-indigo-200 pb-4">
-            <h2 class="text-xl font-semibold text-indigo-800 mb-4">Dados do Pagamento</h2>
+        <!-- Dados do Pagamento -->
+        <div class="mb-6 border-b border-gray-200 pb-4">
+            <h2 class="text-xl font-semibold text-gray-800 mb-4">Dados do Pagamento</h2>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                    <label for="payerName" class="block text-indigo-700 text-sm font-semibold mb-2">Nome Completo do Pagador:</label>
+                    <label for="payerName" class="block text-gray-700 text-sm font-semibold mb-2">Nome Completo do Pagador:</label>
                     <div class="input-container">
                         <i class="fa-solid fa-user input-icon"></i>
-                        <input type="text" id="payerName" class="text-indigo-800 placeholder-indigo-400" placeholder="Ex: Josenorio Alves Nunes">
+                        <input type="text" id="payerName" class="text-gray-800 placeholder-gray-400" placeholder="Ex: Josenorio Alves Nunes">
                     </div>
                 </div>
                 <div>
-                    <label for="paymentValue" id="paymentValueLabel" class="block text-indigo-700 text-sm font-semibold mb-2">Valor Total do Pagamento:</label>
+                    <label for="paymentValue" id="paymentValueLabel" class="block text-gray-700 text-sm font-semibold mb-2">Valor Total do Pagamento (R$):</label>
                     <div class="input-container">
                         <i class="fa-solid fa-money-bill-wave input-icon"></i>
-                        <input type="text" id="paymentValue" class="text-indigo-800 placeholder-indigo-400" placeholder="Ex: 1397,00 ou 1.397,00">
+                        <!-- Input livre, sem formatação automática -->
+                        <input type="text" id="paymentValue" class="text-gray-800 placeholder-gray-400" placeholder="Ex: 1397,00 ou 1.397,00">
                     </div>
                 </div>
                 <div class="md:col-span-2">
-                    <label for="paymentReason" class="block text-indigo-700 text-sm font-semibold mb-2">Motivo do Pagamento:</label>
-                    <div class="input-container">
-                        <i class="fa-solid fa-file-invoice input-icon top-0"></i>
-                        <textarea id="paymentReason" rows="4" class="text-indigo-800 placeholder-indigo-400 resize-y" placeholder="Ex: entrada de hospedagens na Europa, incluindo taxas, passeios e seguro viagem."></textarea>
+                    <label for="paymentReason" class="block text-gray-700 text-sm font-semibold mb-2">Motivo do Pagamento:</label>
+                    <div class="input-container items-start">
+                        <i class="fa-solid fa-file-invoice input-icon mt-1"></i>
+                        <textarea id="paymentReason" rows="4" class="text-gray-800 placeholder-gray-400 resize-y" placeholder="Ex: entrada de hospedagens na Europa, incluindo taxas, passeios e seguro viagem."></textarea>
                     </div>
                 </div>
                 <div>
-                    <label for="paymentDate" class="block text-indigo-700 text-sm font-semibold mb-2">Data do Pagamento:</label>
+                    <label for="paymentDate" class="block text-gray-700 text-sm font-semibold mb-2">Data do Pagamento:</label>
                     <div class="input-container">
                         <i class="fa-solid fa-calendar-day input-icon"></i>
-                        <input type="date" id="paymentDate" class="text-indigo-800">
+                        <input type="date" id="paymentDate" class="text-gray-800">
                     </div>
                 </div>
                 <div>
-                    <label for="paymentMethod" class="block text-indigo-700 text-sm font-semibold mb-2">Forma de Pagamento:</label>
+                    <label for="paymentMethod" class="block text-gray-700 text-sm font-semibold mb-2">Forma de Pagamento:</label>
                     <div class="input-container">
                         <i class="fa-solid fa-credit-card input-icon"></i>
-                        <select id="paymentMethod" class="text-indigo-800 transition duration-200">
-                            <option value="Transferência Bancária via PIX" selected>Transferência Bancária via PIX</option>
+                        <!-- Opções de pagamento atualizadas -->
+                        <select id="paymentMethod" class="text-gray-800 transition duration-200">
+                            <option value="Transferência Bancária" selected>Transferência Bancária</option>
+                            <option value="PIX">PIX</option>
                             <option value="Cartão de Crédito à vista">Cartão de Crédito à vista</option>
                             <option value="Cartão de Crédito em 2x">Cartão de Crédito em 2x</option>
                             <option value="Cartão de Crédito em 3x">Cartão de Crédito em 3x</option>
@@ -168,54 +212,62 @@
             </div>
         </div>
 
+        <!-- Dados da Empresa e Responsável -->
         <div class="mb-8">
-            <h2 class="text-xl font-semibold text-indigo-800 mb-4">Dados da Empresa e Responsável</h2>
+            <h2 class="text-xl font-semibold text-gray-800 mb-4">Dados da Empresa e Responsável</h2>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                    <label for="receiverName" class="block text-indigo-700 text-sm font-semibold mb-2">Nome da Empresa/Pessoa Recebedora:</label>
+                    <label for="receiverName" class="block text-gray-700 text-sm font-semibold mb-2">Nome da Empresa/Pessoa Recebedora:</label>
                     <div class="input-container">
                         <i class="fa-solid fa-building input-icon"></i>
-                        <input type="text" id="receiverName" list="receiverNamesList" class="text-indigo-800 placeholder-indigo-400" placeholder="Ex: Euromirella Agência e Operadora de Turismo">
+                        <!-- Campo preenchido automaticamente, mas editável -->
+                        <input type="text" id="receiverName" list="receiverNamesList" class="text-gray-800 placeholder-gray-400" placeholder="Ex: Euromirella Agência e Operadora de Turismo">
                     </div>
                     <datalist id="receiverNamesList"></datalist>
                 </div>
                 <div class="md:col-span-1">
-                    <label for="signatoryInfo" class="block text-indigo-700 text-sm font-semibold mb-2">Nome e Cargo do Responsável (para Assinatura):</label>
+                    <label for="signatoryInfo" class="block text-gray-700 text-sm font-semibold mb-2">Nome e Cargo do Responsável (para Assinatura):</label>
                     <div class="input-container">
                         <i class="fa-solid fa-signature input-icon"></i>
-                        <input type="text" id="signatoryInfo" class="text-indigo-800 placeholder-indigo-400" placeholder="Ex: Mirella Meirelles, Diretora – EUROMIRELLA">
+                        <!-- Campo preenchido automaticamente, mas editável -->
+                        <input type="text" id="signatoryInfo" class="text-gray-800 placeholder-gray-400" placeholder="Ex: Mirella Meirelles, Diretora – EUROMIRELLA">
                     </div>
                 </div>
             </div>
         </div>
 
+        <!-- Botão de Impressão -->
         <div class="flex items-center justify-center">
-            <button id="printReceiptBtn" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-8 rounded-full focus:outline-none focus:ring-4 focus:ring-indigo-300 transition-all duration-300 ease-in-out transform hover:scale-105 flex items-center justify-center shadow-lg">
+            <button id="printReceiptBtn" class="bg-gray-800 hover:bg-black text-white font-bold py-3 px-8 rounded-full focus:outline-none focus:ring-4 focus:ring-gray-300 transition-all duration-300 ease-in-out transform hover:scale-105 flex items-center justify-center shadow-lg">
                 <i class="fa-solid fa-print mr-2"></i>Imprimir Recibo
                 <div id="loader" class="loader ml-3"></div>
             </button>
         </div>
     </div>
 
+    <!-- Prévia do Recibo -->
     <div id="receiptContainer" class="bg-white p-10 rounded-2xl shadow-xl w-full max-w-2xl">
-        <h2 class="text-3xl font-bold text-center text-indigo-900 mb-6 no-print">Prévia do Recibo</h2>
-        <div id="receiptPreview" class="border-4 border-indigo-300 border-dashed p-8 rounded-xl min-h-[400px] text-indigo-900 leading-relaxed text-base fade-in"></div>
+        <h2 class="text-3xl font-bold text-center text-gray-900 mb-6 no-print">Prévia do Recibo</h2>
+        <!-- Borda da prévia alterada para cinza -->
+        <div id="receiptPreview" class="border-4 border-gray-300 border-dashed p-8 rounded-xl min-h-[400px] text-gray-900 leading-relaxed text-base fade-in"></div>
     </div>
 
-    <footer class="mt-10 text-indigo-400 text-xs text-center no-print">
-        Versão 2.0.1
+    <!-- Rodapé com a Versão -->
+    <footer class="mt-10 text-gray-500 text-xs text-center no-print">
+        Versão 2.2.0
     </footer>
 
+    <!-- Lógica JavaScript -->
     <script type="module">
         // ===== Configuração de moedas =====
         const currencyMap = {
             BRL: { code: 'BRL', locale: 'pt-BR', symbol: 'R$', majorSingular: 'real', majorPlural: 'reais', minorSingular: 'centavo', minorPlural: 'centavos' },
             EUR: { code: 'EUR', locale: 'pt-PT', symbol: '€', majorSingular: 'euro', majorPlural: 'euros', minorSingular: 'cêntimo', minorPlural: 'cêntimos' },
-            USD: { code: 'USD', locale: 'pt-BR', symbol: 'US$', majorSingular: 'dólar', majorPlural: 'dólares', minorSingular: 'centavo', minorPlural: 'centavos' },
-            GBP: { code: 'GBP', locale: 'pt-PT', symbol: '£', majorSingular: 'libra', majorPlural: 'libras', minorSingular: 'penny', minorPlural: 'pence' }
+            USD: { code: 'USD', locale: 'en-US', symbol: 'US$', majorSingular: 'dólar', majorPlural: 'dólares', minorSingular: 'centavo', minorPlural: 'centavos' },
+            GBP: { code: 'GBP', locale: 'en-GB', symbol: '£', majorSingular: 'libra', majorPlural: 'libras', minorSingular: 'penny', minorPlural: 'pence' }
         };
 
-        // ===== Números por extenso (pt) =====
+        // ===== Funções de Valor Por Extenso (pt) =====
         const unidades = ['zero','um','dois','três','quatro','cinco','seis','sete','oito','nove'];
         const especiais = ['dez','onze','doze','treze','quatorze','quinze','dezesseis','dezessete','dezoito','dezenove'];
         const dezenas = ['', '', 'vinte','trinta','quarenta','cinquenta','sessenta','setenta','oitenta','noventa'];
@@ -237,11 +289,11 @@
         }
 
         function valorPorExtensoComMoeda(valor, cfg){
+            // Correção para mapear corretamente o toFixed
             let [inteiro, centavos] = valor.toFixed(2).split('.').map(Number);
             let partes = [];
-            if(inteiro===0 && centavos===0){
-                return `zero ${cfg.majorPlural}`;
-            }
+            if(inteiro===0 && centavos===0){ return `zero ${cfg.majorPlural}`; }
+            
             if(inteiro>0){
                 let temp = inteiro, blocos=[];
                 while(temp>0){ blocos.push(temp%1000); temp=Math.floor(temp/1000); }
@@ -249,11 +301,8 @@
                     const b=blocos[j];
                     if(b>0){
                         let parte = converterTriade(b);
-                        if(j===1){
-                            parte = (b===1 && blocos[0]===0) ? 'mil' : (b===1 ? 'mil' : parte+' mil');
-                        } else if(j>1){
-                            parte += ' ' + (b===1 ? grandezas[0][j] : grandezas[1][j]);
-                        }
+                        if(j===1){ parte = (b===1 && blocos[0]===0) ? 'mil' : (b===1 ? 'mil' : parte+' mil');
+                        } else if(j>1){ parte += ' ' + (b===1 ? grandezas[0][j] : grandezas[1][j]); }
                         partes.unshift(parte.trim());
                     }
                 }
@@ -266,9 +315,7 @@
                 partes.push(centavos===1 ? cfg.minorSingular : cfg.minorPlural);
             }
             let out = partes.join(' ').replace(/\s+/g,' ').trim();
-            if(out.startsWith('e ') && (inteiro===0 || centavos===0)){
-                out = out.substring(2);
-            }
+            if(out.startsWith('e ') && (inteiro===0 || centavos===0)){ out = out.substring(2); }
             return out;
         }
 
@@ -281,19 +328,7 @@
             document.body.appendChild(el);
             setTimeout(()=>el.remove(),3000);
         }
-
-        function parseCurrencyInput(value){
-            if(typeof value!=='string') return 0;
-            const cleaned = value.replace(/[^0-9,.]/g,'');
-            const parts = cleaned.split(/[,.]/);
-            if(parts.length>1){
-                const last = parts.pop();
-                const intPart = parts.join('');
-                return parseFloat(`${intPart}.${last}`);
-            }
-            return parseFloat(cleaned)||0;
-        }
-
+        
         function getTodayDate(){
             const today = new Date();
             const year = today.getFullYear();
@@ -301,13 +336,31 @@
             const day = String(today.getDate()).padStart(2, '0');
             return `${year}-${month}-${day}`;
         }
+        
+        // Função de limpeza de valor para aceitar formato pt-BR/EUA e converter para float
+        function parseCurrencyInput(value){
+            if(typeof value!=='string') return 0;
+            let cleaned = value.trim();
+            
+            // Lógica: Assume que o último separador (vírgula ou ponto) é o decimal.
+            let decimalSeparator = (cleaned.lastIndexOf(',') > cleaned.lastIndexOf('.')) ? ',' : '.';
+            
+            // 1. Remove todos os separadores de milhar (o oposto do decimal)
+            let thousandSeparator = (decimalSeparator === '.') ? ',' : '.';
+            cleaned = cleaned.replace(new RegExp('\\' + thousandSeparator, 'g'), '');
+
+            // 2. Converte o separador decimal para ponto para uso com parseFloat
+            cleaned = cleaned.replace(decimalSeparator, '.');
+            
+            // 3. Remove quaisquer caracteres não numéricos restantes (exceto o ponto decimal)
+            cleaned = cleaned.replace(/[^\d.]/g, '');
+
+            return parseFloat(cleaned)||0;
+        }
 
         function saveToLocalStorage(key, value){
-            try{
-                localStorage.setItem(key, JSON.stringify(value));
-            }catch(e){
-                console.error("Não foi possível salvar no localStorage.", e);
-            }
+            try{ localStorage.setItem(key, JSON.stringify(value)); }
+            catch(e){ console.error("Não foi possível salvar no localStorage.", e); }
         }
 
         function getFromLocalStorage(key){
@@ -320,7 +373,7 @@
             }
         }
 
-        // ===== DOM refs =====
+        // ===== DOM refs e Constantes Fixas (Novas Regras) =====
         let payerNameInput, paymentValueInput, paymentReasonInput, paymentDateInput, paymentMethodInput, receiverNameInput, signatoryInfoInput;
         let proofImageInput, proofImagePreview, logoImageInput, logoImagePreview, signatureImageInput, signatureImagePreview;
         let receiptPreviewDiv, printReceiptBtn, inputFormContainer, loader;
@@ -328,8 +381,13 @@
 
         let uploadedProofImageBase64=null, uploadedLogoBase64=null, uploadedSignatureBase64=null;
 
-        const DEFAULT_SIGNATORY_INFO = "Mirella Meirelles - Diretora EUROMIRELLA";
+        // CONSTANTES FIXAS (Pode ser alterado pelo usuário e persistido)
         const DEFAULT_RECEIVER_NAME = "Euromirella Agência e Operadora de Turismo";
+        const DEFAULT_SIGNATORY_INFO = "Mirella Meirelles - Diretora EUROMIRELLA";
+
+        // Versão do Sistema
+        const CURRENT_VERSION = "2.2.0";
+
 
         function getCurrentCurrencyConfig(){
             const sel = currencySelect.value;
@@ -351,8 +409,10 @@
 
         function formatMoney(value, cfg){
             try{
+                // Tenta formatar usando o código de moeda e locale
                 return new Intl.NumberFormat(cfg.locale||'pt-BR', { style:'currency', currency: cfg.code||'BRL' }).format(value);
             }catch(e){
+                // Fallback para formatação simples
                 const base = new Intl.NumberFormat('pt-BR', { minimumFractionDigits:2, maximumFractionDigits:2 }).format(value);
                 return (cfg.symbol||'') + ' ' + base;
             }
@@ -368,11 +428,12 @@
         function updateReceiptPreview(){
             const payerName = payerNameInput.value || '[Nome do Pagador]';
             const paymentValue = parseCurrencyInput(paymentValueInput.value);
+            
             const paymentReason = paymentReasonInput.value || '[Motivo do Pagamento]';
             const paymentDate = paymentDateInput.value ? new Date(paymentDateInput.value+'T00:00:00').toLocaleDateString('pt-BR') : '[Data do Pagamento]';
             const paymentMethod = paymentMethodInput.value || '[Forma de Pagamento]';
-            const receiverName = receiverNameInput.value || '[Nome da Empresa Recebedora]';
-            const signatoryInfo = signatoryInfoInput.value || '[Nome e Cargo do Responsável]';
+            const receiverName = receiverNameInput.value || DEFAULT_RECEIVER_NAME;
+            const signatoryInfo = signatoryInfoInput.value || DEFAULT_SIGNATORY_INFO;
 
             const cfg = getCurrentCurrencyConfig();
             const valueExtenso = valorPorExtensoComMoeda(paymentValue, cfg);
@@ -382,24 +443,25 @@
                 ? `<div id="signatureImageContainer" class="flex justify-center mt-4 mb-2"><img src="${uploadedSignatureBase64}" alt="Assinatura" class="max-w-full h-auto"/></div>`
                 : `<p class="text-center">_________________________________________</p>`;
 
+            // Conteúdo do recibo em preto e branco
             receiptPreviewDiv.innerHTML = `
                 ${uploadedLogoBase64 ? `<div id="logoImageContainer" class="mb-4 flex justify-center"><img src="${uploadedLogoBase64}" alt="Logo da Empresa" class="max-w-full h-auto rounded-lg shadow-sm"/></div>` : ''}
-                <p class="text-center font-bold text-lg mb-4">RECIBO DE PAGAMENTO</p>
-                <p class="indent-8 text-justify">
-                    Recebemos de <span class="font-semibold text-indigo-700">${payerName}</span>, o valor de
-                    <span class="font-semibold text-indigo-700">${formattedPaymentValue}</span> (${valueExtenso}),
-                    referente à <span class="font-semibold text-indigo-700">${paymentReason}</span>. O pagamento foi realizado no dia
-                    <span class="font-semibold text-indigo-700">${paymentDate}</span>, por meio de
-                    <span class="font-semibold text-indigo-700">${paymentMethod}</span>, destinado à conta bancária da empresa
-                    <span class="font-semibold text-indigo-700">${receiverName}</span>. Declaramos, para os devidos fins, que este recibo é
+                <p class="text-center font-bold text-lg mb-4 text-black">RECIBO DE PAGAMENTO</p>
+                <p class="indent-8 text-justify text-black">
+                    Recebemos de <span class="font-semibold text-black">${payerName}</span>, o valor de
+                    <span class="font-semibold text-black">${formattedPaymentValue}</span> (${valueExtenso}),
+                    referente à <span class="font-semibold text-black">${paymentReason}</span>. O pagamento foi realizado no dia
+                    <span class="font-semibold text-black">${paymentDate}</span>, por meio de
+                    <span class="font-semibold text-black">${paymentMethod}</span>, destinado à conta bancária da empresa
+                    <span class="font-semibold text-black">${receiverName}</span>. Declaramos, para os devidos fins, que este recibo é
                     verdadeiro e corresponde ao valor efetivamente recebido.
                 </p>
                 <br>
                 ${signatureContent}
-                <p class="text-center"><span class="font-semibold text-indigo-700">${signatoryInfo}</span></p>
+                <p class="text-center text-black"><span class="font-semibold text-black">${signatoryInfo}</span></p>
                 ${uploadedProofImageBase64 ? `<div id="receiptImageContainer" class="mt-4 flex justify-center"><img src="${uploadedProofImageBase64}" alt="Comprovante de Pagamento" class="max-w-full h-auto rounded-lg shadow-sm"/></div>` : ''}
-                <div class="mt-4 text-xs italic text-indigo-500 text-center">
-                    <span>Gerado por: Gerador de Recibos EUROMIRELLA</span>
+                <div class="mt-4 text-xs italic text-gray-500 text-center">
+                    <span>Gerado por: Gerador de Recibos EUROMIRELLA | Versão ${CURRENT_VERSION}</span>
                 </div>
             `;
         }
@@ -432,11 +494,11 @@
             customMajorInput = document.getElementById('customMajor');
             customMinorInput = document.getElementById('customMinor');
             paymentValueLabel = document.getElementById('paymentValueLabel');
-
-            // Preenchimento inicial
-            paymentDateInput.value = getTodayDate();
-            signatoryInfoInput.value = getFromLocalStorage('signatoryInfo') || DEFAULT_SIGNATORY_INFO;
+            
+            // 5 & 6. Preenchimento inicial com valores fixos, mas permitindo edição/persistência
             receiverNameInput.value = getFromLocalStorage('receiverName') || DEFAULT_RECEIVER_NAME;
+            signatoryInfoInput.value = getFromLocalStorage('signatoryInfo') || DEFAULT_SIGNATORY_INFO;
+            paymentDateInput.value = getTodayDate();
 
             // Gerenciamento dos nomes de recebedores
             let receiverNames = getFromLocalStorage('receiverNames') || [];
@@ -460,7 +522,7 @@
                 i.addEventListener('input', updateReceiptPreview);
             });
 
-            // Salvamento automático dos campos específicos
+            // Salvamento automático dos campos fixos (Persistência da alteração do default)
             receiverNameInput.addEventListener('input', (e) => saveToLocalStorage('receiverName', e.target.value));
             signatoryInfoInput.addEventListener('input', (e) => saveToLocalStorage('signatoryInfo', e.target.value));
 
@@ -472,7 +534,7 @@
             currencySelect.addEventListener('change', ()=>{ toggleCustomFields(); updateCurrencyLabel(); updateReceiptPreview(); });
             [customMajorInput, customMinorInput].forEach(i=> i.addEventListener('input', ()=>{ updateCurrencyLabel(); updateReceiptPreview(); }));
 
-            // uploads
+            // uploads de imagem (sem persistência para logo/assinatura)
             proofImageInput.addEventListener('change', e=>{
                 const file=e.target.files[0];
                 if(file){
@@ -526,8 +588,9 @@
             // init
             toggleCustomFields();
             updateCurrencyLabel();
-            updateReceiptPreview();
+            updateReceiptPreview(); // 2. Prévia mostrada
         };
     </script>
 </body>
 </html>
+```
