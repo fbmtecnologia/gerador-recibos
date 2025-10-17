@@ -43,6 +43,14 @@
             background: transparent;
             color: #1f2937; /* Cor do texto padrão */
         }
+        /* Estilo para input readonly (campo de número de recibo) */
+        .input-container input[readonly] {
+            cursor: default;
+            font-weight: 600;
+            color: #333;
+            background-color: #f9fafb; 
+        }
+
         .input-container input::placeholder, .input-container textarea::placeholder {
             color: #9ca3af;
         }
@@ -52,46 +60,56 @@
             margin-right: 0.75rem;
         }
 
-        /* Estilos de impressão (Foco Totalmente em Preto/Branco) */
+        /* Estilos de impressão (Foco Totalmente em Preto/Branco e COMPRESSÃO) */
         @media print {
+            /* Definindo página A4 com margens ZERO */
             @page { size: A4 portrait; margin: 0 !important; }
             html,body{width:100%;height:100%;margin:0 !important;padding:0 !important;overflow:hidden !important;background:#fff !important; color: #000 !important;}
             body>*:not(#receiptContainer){display:none !important}
             
-            /* Ajustes de cor para a impressão */
-            #receiptContainer { color: #000 !important; }
-            /* Borda do recibo sólida preta, padding vertical mínimo */
+            /* Ajustes de cor e padding do container principal */
+            #receiptContainer { 
+                color: #000 !important; 
+                margin: 0 !important;
+                padding: 10px !important; /* Mínimo de padding no container */
+            }
+
+            /* Estilo da Prévia (Borda) */
             #receiptPreview { 
                 border-color: #000 !important; 
                 color: #000 !important; 
                 border-style: solid !important; 
                 border-width: 1px !important; 
-                padding: 10px 15px !important; /* Reduzindo padding vertical */
-            } 
+                padding: 15px !important; /* Padding interno da prévia para conteúdo */
+                box-shadow: none !important; 
+                min-height: auto !important;
+            }
             
-            /* Removendo cores do tema e usando preto */
+            /* Forçando a cor preta no texto */
             #receiptPreview .font-semibold, 
-            #receiptPreview .text-indigo-700, 
-            #receiptPreview .text-indigo-900 { 
+            #receiptPreview .text-black { 
                 color: #000 !important; 
                 font-weight: 600 !important;
             }
 
-            #receiptPreview .text-gray-700 {
+            #receiptPreview p {
                 color: #000 !important;
+                page-break-inside: avoid !important;
             }
             
-            #receiptContainer{display:block !important;visibility:visible !important;position:absolute !important;left:0;top:0;width:100% !important;max-width:100% !important;height:auto !important;min-height:auto !important;margin:0 !important;padding:8px !important;box-shadow:none !important;border:none !important;page-break-after:avoid !important;page-break-inside:avoid !important}
-            #receiptPreview{width:100% !important;margin:0 !important;box-shadow:none !important;border:none !important;padding:10px 15px !important;min-height:auto !important;page-break-inside:avoid !important; border:none !important;}
+            #receiptContainer{display:block !important;visibility:visible !important;position:absolute !important;left:0;top:0;width:100% !important;max-width:100% !important;height:auto !important;min-height:auto !important;margin:0 !important;padding:10px !important;box-shadow:none !important;border:none !important;page-break-after:avoid !important;page-break-inside:avoid !important}
             
-            #logoImageContainer img{max-width:180px !important;max-height:90px !important;object-fit:contain !important;display:block !important;margin:0 auto 10px auto !important} /* Reduzido margem */
-            #signatureImageContainer img{max-width:100px !important;max-height:50px !important;object-fit:contain !important;display:block !important;margin:3px auto 3px auto !important} /* Reduzido margem */
+            #logoImageContainer img{max-width:180px !important;max-height:90px !important;object-fit:contain !important;display:block !important;margin:0 auto 8px auto !important} /* Reduzido margem */
+            #signatureImageContainer img{max-width:100px !important;max-height:50px !important;object-fit:contain !important;display:block !important;margin:2px auto 2px auto !important} /* Reduzido margem */
             
-            /* Ajuste chave: reduzindo a altura máxima do comprovante para garantir uma única página */
-            #receiptImageContainer img{max-width:100% !important;max-height:500px !important; /* Reduzido de 600px para 500px */
-            object-fit:contain !important;margin-top:10px !important} 
+            /* AJUSTE CHAVE: Máxima compressão para a imagem do comprovante */
+            #receiptImageContainer img{
+                max-width:100% !important;
+                max-height:480px !important; /* Reduzido para 480px para dar mais folga na página A4 */
+                object-fit:contain !important;
+                margin-top:8px !important; /* Margem reduzida */
+            } 
             
-            #receiptPreview p{page-break-inside:avoid !important;orphans:2;widows:2}
             .no-print{display:none !important}
         }
     </style>
@@ -162,6 +180,16 @@
         <div class="mb-6 border-b border-gray-200 pb-4">
             <h2 class="text-xl font-semibold text-gray-800 mb-4">Dados do Pagamento</h2>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- CAMPO DE NÚMERO DE RECIBO (Automatico) -->
+                <div>
+                    <label for="receiptNumber" class="block text-gray-700 text-sm font-semibold mb-2">Número do Recibo:</label>
+                    <div class="input-container bg-gray-100">
+                        <i class="fa-solid fa-hashtag input-icon"></i>
+                        <input type="text" id="receiptNumber" class="text-gray-800" readonly>
+                    </div>
+                </div>
+                <!-- FIM CAMPO -->
+
                 <div>
                     <label for="payerName" class="block text-gray-700 text-sm font-semibold mb-2">Nome Completo do Pagador:</label>
                     <div class="input-container">
@@ -289,7 +317,6 @@
         }
 
         function valorPorExtensoComMoeda(valor, cfg){
-            // Correção para mapear corretamente o toFixed
             let [inteiro, centavos] = valor.toFixed(2).split('.').map(Number);
             let partes = [];
             if(inteiro===0 && centavos===0){ return `zero ${cfg.majorPlural}`; }
@@ -373,8 +400,48 @@
             }
         }
 
+        // ===== Controle de Numeração Sequencial =====
+        const LAST_RECEIPT_KEY = 'last_receipt_info';
+
+        function formatReceiptCount(count) {
+            return String(count).padStart(3, '0');
+        }
+
+        // Retorna a informação do último recibo (ou o novo inicializado)
+        function getReceiptNumberInfo() {
+            const today = new Date();
+            const currentYear = today.getFullYear();
+            
+            // { year: 2025, count: 15 } ou null
+            let info = getFromLocalStorage(LAST_RECEIPT_KEY);
+
+            // Se o ano mudou ou não há info, reinicia a contagem
+            if (!info || info.year < currentYear) {
+                // Inicia a contagem em 1 para o novo ano
+                info = { year: currentYear, count: 1 };
+                // Salva o novo valor para que o campo não fique vazio
+                saveToLocalStorage(LAST_RECEIPT_KEY, info); 
+            }
+            
+            return info;
+        }
+
+        // Retorna o número formatado para exibição (Ex: 015/2025)
+        function getCurrentFormattedReceiptNumber(info) {
+             const { year, count } = info;
+             return `${formatReceiptCount(count)}/${year}`;
+        }
+
+        // Incrementa o contador e salva no localStorage APÓS a impressão
+        function generateAndSaveNextReceiptNumber(currentInfo) {
+            const nextCount = currentInfo.count + 1;
+            const newInfo = { year: currentInfo.year, count: nextCount };
+            saveToLocalStorage(LAST_RECEIPT_KEY, newInfo);
+        }
+        // ===== Fim Controle de Numeração Sequencial =====
+
         // ===== DOM refs e Constantes Fixas (Novas Regras) =====
-        let payerNameInput, paymentValueInput, paymentReasonInput, paymentDateInput, paymentMethodInput, receiverNameInput, signatoryInfoInput;
+        let payerNameInput, paymentValueInput, paymentReasonInput, paymentDateInput, paymentMethodInput, receiverNameInput, signatoryInfoInput, receiptNumberInput;
         let proofImageInput, proofImagePreview, logoImageInput, logoImagePreview, signatureImageInput, signatureImagePreview;
         let receiptPreviewDiv, printReceiptBtn, inputFormContainer, loader;
         let currencySelect, customMajorInput, customMinorInput, paymentValueLabel, receiverNamesDatalist, customCurrencyInputsDiv;
@@ -388,6 +455,13 @@
         // Versão do Sistema
         const CURRENT_VERSION = "2.2.0";
 
+        // Função para atualizar o campo do número do recibo e o preview
+        function updateReceiptUI() {
+            const currentInfo = getReceiptNumberInfo();
+            const currentNumber = getCurrentFormattedReceiptNumber(currentInfo);
+            receiptNumberInput.value = currentNumber;
+            updateReceiptPreview(currentNumber);
+        }
 
         function getCurrentCurrencyConfig(){
             const sel = currencySelect.value;
@@ -425,7 +499,7 @@
             paymentValueLabel.textContent = labelBase + symbol + ':';
         }
 
-        function updateReceiptPreview(){
+        function updateReceiptPreview(receiptNumberFromUI = null){
             const payerName = payerNameInput.value || '[Nome do Pagador]';
             const paymentValue = parseCurrencyInput(paymentValueInput.value);
             
@@ -434,6 +508,9 @@
             const paymentMethod = paymentMethodInput.value || '[Forma de Pagamento]';
             const receiverName = receiverNameInput.value || DEFAULT_RECEIVER_NAME;
             const signatoryInfo = signatoryInfoInput.value || DEFAULT_SIGNATORY_INFO;
+            
+            // Usa o número do recibo do campo de UI
+            const receiptNumber = receiptNumberFromUI || receiptNumberInput.value || '[Número do Recibo]';
 
             const cfg = getCurrentCurrencyConfig();
             const valueExtenso = valorPorExtensoComMoeda(paymentValue, cfg);
@@ -446,6 +523,7 @@
             // Conteúdo do recibo em preto e branco
             receiptPreviewDiv.innerHTML = `
                 ${uploadedLogoBase64 ? `<div id="logoImageContainer" class="mb-4 flex justify-center"><img src="${uploadedLogoBase64}" alt="Logo da Empresa" class="max-w-full h-auto rounded-lg shadow-sm"/></div>` : ''}
+                <p class="text-right text-sm font-semibold mb-4 text-black">RECIBO No <span class="font-semibold text-black">${receiptNumber}</span></p>
                 <p class="text-center font-bold text-lg mb-4 text-black">RECIBO DE PAGAMENTO</p>
                 <p class="indent-8 text-justify text-black">
                     Recebemos de <span class="font-semibold text-black">${payerName}</span>, o valor de
@@ -477,6 +555,8 @@
             signatoryInfoInput = document.getElementById('signatoryInfo');
             receiverNamesDatalist = document.getElementById('receiverNamesList');
             customCurrencyInputsDiv = document.getElementById('custom-currency-inputs');
+            // Referência para o novo campo de número do recibo
+            receiptNumberInput = document.getElementById('receiptNumber');
 
             proofImageInput = document.getElementById('proofImageInput');
             proofImagePreview = document.getElementById('proofImagePreview');
@@ -495,10 +575,24 @@
             customMinorInput = document.getElementById('customMinor');
             paymentValueLabel = document.getElementById('paymentValueLabel');
             
-            // 5 & 6. Preenchimento inicial com valores fixos, mas permitindo edição/persistência
+            // Preenchimento inicial
             receiverNameInput.value = getFromLocalStorage('receiverName') || DEFAULT_RECEIVER_NAME;
             signatoryInfoInput.value = getFromLocalStorage('signatoryInfo') || DEFAULT_SIGNATORY_INFO;
             paymentDateInput.value = getTodayDate();
+            
+            // === NOVO REQUISITO: Forçar a contagem inicial para 102/AAAA (apenas se for o primeiro recibo do ano) ===
+            const today = new Date();
+            const currentYear = today.getFullYear();
+            let currentInfoForInit = getFromLocalStorage(LAST_RECEIPT_KEY);
+
+            // Se for o primeiro acesso OU se o contador foi resetado para 1 (início de ano), forçamos o início em 102.
+            if (!currentInfoForInit || (currentInfoForInit.year === currentYear && currentInfoForInit.count === 1)) {
+                const startCount = 102;
+                // A contagem é o PRÓXIMO número a ser usado.
+                const newInfo = { year: currentYear, count: startCount };
+                saveToLocalStorage(LAST_RECEIPT_KEY, newInfo);
+            }
+            // === FIM NOVO REQUISITO ===
 
             // Gerenciamento dos nomes de recebedores
             let receiverNames = getFromLocalStorage('receiverNames') || [];
@@ -519,7 +613,8 @@
 
             // listeners de campos
             [payerNameInput, paymentValueInput, paymentReasonInput, paymentDateInput, paymentMethodInput, receiverNameInput, signatoryInfoInput].forEach(i=>{
-                i.addEventListener('input', updateReceiptPreview);
+                // Atualiza a prévia, que puxa o número do recibo do campo
+                i.addEventListener('input', () => updateReceiptPreview()); 
             });
 
             // Salvamento automático dos campos fixos (Persistência da alteração do default)
@@ -571,26 +666,67 @@
                 }
             });
 
-            // imprimir
+            // imprimir (Lógica de numeração automática e nome de arquivo)
             printReceiptBtn.addEventListener('click', ()=>{
                 const numericPaymentValue = parseCurrencyInput(paymentValueInput.value);
+                
                 if(!payerNameInput.value || isNaN(numericPaymentValue) || !paymentReasonInput.value || !paymentDateInput.value || !paymentMethodInput.value || !receiverNameInput.value || !signatoryInfoInput.value){
                     showMessage("Por favor, preencha todos os campos corretamente antes de imprimir o recibo.", 'error');
                     return;
                 }
+
+                // 1. Captura o número de recibo ATUAL para o arquivo
+                const currentReceiptNumber = receiptNumberInput.value.replace('/', '-'); // Ex: 001-2025
+
+                // 2. Prepara o nome do arquivo PDF (Número + Cliente + Resumo)
+                // Limpa e resume o nome do pagador (máx 3 palavras)
+                const clientName = payerNameInput.value
+                    .replace(/[^a-zA-Z0-9\s]/g, '')
+                    .trim()
+                    .split(/\s+/)
+                    .slice(0, 3)
+                    .join('_')
+                    .toUpperCase();
+                
+                // Limpa e resume a razão (máx 5 palavras)
+                const reasonSummary = paymentReasonInput.value
+                    .replace(/[^a-zA-Z0-9\s]/g, '')
+                    .trim()
+                    .split(/\s+/)
+                    .slice(0, 5)
+                    .join('_')
+                    .toUpperCase();
+                
+                // Define o título temporário do documento para ser o nome do arquivo PDF
+                const originalTitle = document.title;
+                const newTitle = `RECIBO_${currentReceiptNumber}_${clientName}_${reasonSummary}`;
+
+                document.title = newTitle;
+
+                // Oculta UI e dispara a impressão
                 inputFormContainer.classList.add('hidden');
                 document.querySelector('#receiptContainer h2.no-print').classList.add('hidden');
                 window.print();
+                
+                // 3. Restaura o título e salva o próximo número de sequência (APÓS a impressão)
+                document.title = originalTitle;
+                
+                const currentInfo = getReceiptNumberInfo(); // Pega a info (que agora será 102/2025 ou mais)
+                generateAndSaveNextReceiptNumber(currentInfo);
+                
+                // 4. Atualiza a UI para mostrar o próximo número de recibo (ex: 103/2025)
+                updateReceiptUI();
+
+                // Mostra UI de volta
                 inputFormContainer.classList.remove('hidden');
                 document.querySelector('#receiptContainer h2.no-print').classList.remove('hidden');
             });
 
-            // init
+            // init: Define o número do recibo na inicialização
             toggleCustomFields();
             updateCurrencyLabel();
-            updateReceiptPreview(); // 2. Prévia mostrada
+            updateReceiptUI(); 
         };
     </script>
 </body>
 </html>
-```
